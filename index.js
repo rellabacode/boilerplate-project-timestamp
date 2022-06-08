@@ -2,10 +2,9 @@
 // where your node app starts
 
 // init project
-// var express = require('express');
-import express from 'express';
-//var common = require('./public/common.mjs');
-import {getDatePart, getTimePart} from "./public/common.mjs";
+var express = require('express');
+//import express from 'express';
+//import {getDatePart, getTimePart} from "./public/common.mjs";
 
 import path from 'path';
 import {fileURLToPath} from "url";
