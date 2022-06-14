@@ -5,15 +5,6 @@
 var express = require('express');
 var app = express();
 
-
-// Your own super cool function
-// var logger = function(req, res, next) {
-//     console.log("GOT REQUEST ! "+ req.url);
-//     next(); // Passing the request to the next handler in the stack.
-// }
-
-// app.use(logger); // Here you add your logger to the stack.
-
 // enable CORS (https://en.wikipedia.org/wiki/Cross-origin_resource_sharing)
 // so that your API is remotely testable by FCC
 var cors = require('cors');
@@ -27,37 +18,34 @@ app.get("/", function (req, res) {
     res.sendFile(__dirname + '/views/index.html');
 });
 
-app.get("/api/:unix(\\d{1,})", function (req, res) {
-    console.log(req.params);
-    var date = (req.params.unix ? new Date(parseInt(req.params.unix)) : new Date());
-
-    if (date instanceof Date && !isNaN(date.valueOf())) {
-        res.json({unix: date.getTime(), utc: date.toUTCString()});
-    }
-    return res.json({error: "Invalid Date"});
-});
-
-app.get("(/api|/api/(:year(19[7-9][0-9]|[2-9][0-9][0-9][0-9])-:month(0[1-9]|1[0-2])-:day(0[1-9]|1[0-9]|2[0-9]|3[0-1])" +
-    "(T:hour(0[0-9]|1[0-9]|2[0-3])\::minute(0[0-9]|1[0-9]|2[0-9]|3[0-9]|4[0-9]|5[0-9])\::second(0[0-9]|1[0-9]|2[0-9]|3[0-9]|4[0-9]|5[0-9])" +
-    "(\.[0-9]{3}[+-]:zhour(0[0-9]|1[0-9]|2[0-4])::zmin(0[0-9]|1[0-9]|2[0-9]|3[0-9]|4[0-9]|5[0-9]))?)?)?)?|/api/:dateString",
+app.get("/api/:timestamp(\\d{1,})",
     function (req, res) {
+        let date = new Date(parseInt(req.params.timestamp));
+        if (date.toString() === "Invalid Date") {
+            res.json({error: "Invalid Date"});
+        } else {
+            res.json({unix: date.valueOf(), utc: date.toUTCString()});
+        }
+    });
 
-        console.log(req.params);
-
-        if (req.params.year === undefined && req.params.hour === undefined) {
-            let current = new Date();
-            return res.json({unix: current.getTime(), utc: current.toUTCString()});
+app.get("/api/:date_string",
+    function (req, res) {
+        if (!req.params.date_string) {
+            res.json({unix: Date.now(), utc: Date()});
         }
 
-        let milliseconds = (req.params.hour ?
-            Date.UTC(req.params.year, req.params.month - 1, req.params.day, req.params.hour, req.params.minute, req.params.second) :
-            Date.UTC(req.params.year, req.params.month - 1, req.params.day));
+        date = new Date(req.params.date_string);
 
-        let date = new Date(milliseconds);
-        if (date instanceof Date && !isNaN(date.valueOf())) {
-            res.json({unix: date.getTime(), utc: date.toUTCString()});
+        if (date.toString() === "Invalid Date") {
+            res.json({error: "Invalid Date"});
+        } else {
+            res.json({unix: date.valueOf(), utc: date.toUTCString()});
         }
-        return res.json({error: "Invalid Date"});
+    });
+
+app.get("/api/",
+    function (req, res) {
+        res.json({unix: Date.now(), utc: Date()});
     });
 
 // listen for requests :)
